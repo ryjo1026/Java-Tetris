@@ -9,6 +9,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Tetris extends JComponent{
+	private static final long serialVersionUID = 1L;
 	//TODO clean up variable and method permissions
 	
 	Color[][] board;
@@ -18,7 +19,7 @@ public class Tetris extends JComponent{
 	Color backgroundColor= new Color(41, 128, 185);
 	Color emptyColor=new Color(127, 140, 141);
 	//Debug Purposes else set borderColor=emptyColor
-	Color borderColor= emptyColor;//Color.WHITE;
+	Color borderColor= emptyColor; //Color.WHITE;
 	
 	int innerBorderWidth=9;
 	
@@ -82,15 +83,16 @@ public class Tetris extends JComponent{
 	static int cellSize=40;
 
 	public static void main(String[] args) {
-		JFrame frame= new JFrame("Tetris");
+		final JFrame frame= new JFrame("Tetris");
 		
 		frame.getContentPane().setPreferredSize(new Dimension(cellSize*15,cellSize*15));
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.add(new Tetris());
+		Tetris tetris= new Tetris();
+		frame.add(tetris);
+		frame.addKeyListener(new Controller(tetris));
 		frame.pack();
 		frame.getContentPane().setLocation(0,0);
-		
 		
 		java.awt.EventQueue.invokeLater(new Runnable() {
 	          public void run() {
@@ -129,7 +131,7 @@ public class Tetris extends JComponent{
 	
 	public class TimerOutput extends TimerTask{
 		public void run(){
-			movePiece(1,0);
+			movePiece(0,1);
 		}
 	}
 	
@@ -140,19 +142,24 @@ public class Tetris extends JComponent{
 	 */
 	public void movePiece(int x, int y){
 		if(moveIsLegal(x,y)){
-			fallingPieceRow+=x;
-			fallingPieceCol-=y;
+			fallingPieceRow+=y;
+			fallingPieceCol-=x;
 			repaint();
 		}
 		else if(!moveIsLegal(x,y) && groundHit){
 			placeFallingPiece();
 			newFallingPiece();
 		}
+		else
+			fallingPieceRow+=y;
 	}
 	
 	public boolean moveIsLegal(int x, int y){
 		if(fallingPieceRow+y+fallingPieceRows>=rows){
 			groundHit=true;
+			return false;
+		}
+		else if(fallingPieceCol+x+fallingPieceCols>=cols){
 			return false;
 		}
 		for(int i=0; i<fallingPieceCols; i++)
